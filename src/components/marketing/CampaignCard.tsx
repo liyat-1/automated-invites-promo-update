@@ -1,21 +1,28 @@
 import { useEffect, useState } from "react";
-import { Clock, Ellipsis, FlaskConical, Mail, MessageSquare, Pencil, Power, RotateCcw } from "lucide-react";
+import { Clock, Ellipsis, FlaskConical, Gift, Mail, MessageSquare, Paperclip, Pencil, Power, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   AUDIENCE_LABEL,
+  CAMPAIGN_DRAG_TYPE,
+  MEDIA_DRAG_TYPE,
   STRATEGY_LABEL,
+  attachMediaToCampaign,
+  campaignMediaIds,
+  campaignPromotion,
+  detachMediaFromCampaign,
   fullTime,
   initialsOf,
   lastEdit,
   timeAgo,
+  useMarketing,
   type MarketingCampaign,
 } from "@/lib/marketing";
 
 export function CampaignCard({
   campaign,
-  selected,
+  selected = false,
   selectable = false,
   onSelect,
   onToggle,
@@ -24,24 +31,50 @@ export function CampaignCard({
   onRevert,
 }: {
   campaign: MarketingCampaign;
-  selected: boolean;
+  selected?: boolean;
   selectable?: boolean;
-  onSelect: (value: boolean) => void;
+  onSelect?: (value: boolean) => void;
   onToggle: (value: boolean) => void;
   onEdit: () => void;
   onTest: () => void;
   onRevert: () => void;
 }) {
+  const state = useMarketing();
   const edit = lastEdit(campaign);
   const [mounted, setMounted] = useState(false);
+  const [over, setOver] = useState(false);
   useEffect(() => setMounted(true), []);
   const hasCustomization = Object.values(campaign.variants).some((variant) => variant.customization.text || variant.customization.email);
+  const promotion = campaignPromotion(state, campaign);
+  const mediaIds = campaignMediaIds(campaign);
+  const attached = mediaIds.map((id) => state.media.find((item) => item.id === id)).filter(Boolean) as { id: string; name: string }[];
 
   return (
-    <article className={`flex min-h-[188px] flex-col overflow-hidden rounded-lg border bg-card shadow-card transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lift ${selected ? "border-brand ring-2 ring-brand/20" : "border-border hover:border-brand/40"}`}>
+    <article
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.setData(CAMPAIGN_DRAG_TYPE, campaign.id);
+        event.dataTransfer.effectAllowed = "move";
+      }}
+      onDragOver={(event) => {
+        if (!event.dataTransfer.types.includes(MEDIA_DRAG_TYPE)) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(event) => {
+        const id = event.dataTransfer.getData(MEDIA_DRAG_TYPE);
+        if (!id) return;
+        event.preventDefault();
+        setOver(false);
+        attachMediaToCampaign(campaign.id, id);
+      }}
+      className={`flex min-h-[188px] flex-col overflow-hidden rounded-lg border bg-card shadow-card transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lift ${over ? "border-brand ring-2 ring-brand/30" : selected ? "border-brand ring-2 ring-brand/20" : "border-border hover:border-brand/40"}`}
+    >
       <div className="flex items-start gap-3 px-4 pt-4">
         {selectable && (
-          <input type="checkbox" checked={selected} onChange={(event) => onSelect(event.target.checked)} aria-label={`Select ${campaign.name}`} className="mt-1 size-4 shrink-0 accent-brand" />
+          <input type="checkbox" checked={selected} onChange={(event) => onSelect?.(event.target.checked)} aria-label={`Select ${campaign.name}`} className="mt-1 size-4 shrink-0 accent-brand" />
         )}
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[14px] font-semibold text-card-foreground">{campaign.name}</h3>
@@ -52,11 +85,42 @@ export function CampaignCard({
         </div>
         <Switch checked={campaign.enabled} onCheckedChange={onToggle} aria-label={`${campaign.enabled ? "Disable" : "Enable"} ${campaign.name}`} />
       </div>
+
+      {promotion && (
+        <div className="mx-4 mt-2.5 flex items-center gap-1.5">
+          <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/40 bg-brand-soft px-2 py-0.5 text-[10.5px] font-semibold text-brand" title={`${promotion.name} · ${promotion.detail}`}>
+            <Gift size={11} className="shrink-0" />
+            <span className="truncate">{promotion.name}</span>
+          </span>
+        </div>
+      )}
+
       <div className="mx-4 mt-3 rounded-md border border-border bg-secondary/50 px-3 py-2">
         <p className="flex items-center gap-1.5 text-[12px] font-semibold text-card-foreground">
           {campaign.strategy === "text" ? <MessageSquare size={13} className="shrink-0 text-brand" /> : <Mail size={13} className="shrink-0 text-brand" />}
           <span className="truncate">{STRATEGY_LABEL[campaign.strategy]}</span>
         </p>
+      </div>
+
+      <div className={`mx-4 mt-2.5 rounded-md border border-dashed px-3 py-2 transition-colors ${over ? "border-brand bg-brand-soft" : "border-border"}`}>
+        {attached.length === 0 ? (
+          <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Paperclip size={11} className="shrink-0" />
+            {over ? "Drop to attach media" : "Drag media here to attach"}
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {attached.map((item) => (
+              <span key={item.id} className="inline-flex max-w-full items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-[10.5px] text-card-foreground">
+                <Paperclip size={10} className="shrink-0 text-muted-foreground" />
+                <span className="max-w-[110px] truncate">{item.name}</span>
+                <button type="button" onClick={() => detachMediaFromCampaign(campaign.id, item.id)} aria-label={`Remove ${item.name}`} className="text-muted-foreground hover:text-foreground">
+                  <X size={10} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-auto pt-3">

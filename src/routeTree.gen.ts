@@ -24,6 +24,7 @@ import { Route as OtaOfferRouteImport } from './routes/ota.offer'
 import { Route as OtaJourneyRouteImport } from './routes/ota.journey'
 import { Route as OtaGuestsRouteImport } from './routes/ota.guests'
 import { Route as MarketingTransactionalRouteImport } from './routes/marketing.transactional'
+import { Route as MarketingPromotionsRouteImport } from './routes/marketing.promotions'
 import { Route as MarketingMediaRouteImport } from './routes/marketing.media'
 import { Route as MarketingInvitesRouteImport } from './routes/marketing.invites'
 import { Route as MarketingInPropertyRouteImport } from './routes/marketing.in-property'
@@ -103,6 +104,11 @@ const MarketingTransactionalRoute = MarketingTransactionalRouteImport.update({
   path: '/marketing/transactional',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketingPromotionsRoute = MarketingPromotionsRouteImport.update({
+  id: '/marketing/promotions',
+  path: '/marketing/promotions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketingMediaRoute = MarketingMediaRouteImport.update({
   id: '/marketing/media',
   path: '/marketing/media',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/marketing/in-property': typeof MarketingInPropertyRoute
   '/marketing/invites': typeof MarketingInvitesRoute
   '/marketing/media': typeof MarketingMediaRoute
+  '/marketing/promotions': typeof MarketingPromotionsRoute
   '/marketing/transactional': typeof MarketingTransactionalRoute
   '/ota/guests': typeof OtaGuestsRoute
   '/ota/journey': typeof OtaJourneyRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/marketing/in-property': typeof MarketingInPropertyRoute
   '/marketing/invites': typeof MarketingInvitesRoute
   '/marketing/media': typeof MarketingMediaRoute
+  '/marketing/promotions': typeof MarketingPromotionsRoute
   '/marketing/transactional': typeof MarketingTransactionalRoute
   '/ota/guests': typeof OtaGuestsRoute
   '/ota/journey': typeof OtaJourneyRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/marketing/in-property': typeof MarketingInPropertyRoute
   '/marketing/invites': typeof MarketingInvitesRoute
   '/marketing/media': typeof MarketingMediaRoute
+  '/marketing/promotions': typeof MarketingPromotionsRoute
   '/marketing/transactional': typeof MarketingTransactionalRoute
   '/ota/guests': typeof OtaGuestsRoute
   '/ota/journey': typeof OtaJourneyRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/marketing/in-property'
     | '/marketing/invites'
     | '/marketing/media'
+    | '/marketing/promotions'
     | '/marketing/transactional'
     | '/ota/guests'
     | '/ota/journey'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/marketing/in-property'
     | '/marketing/invites'
     | '/marketing/media'
+    | '/marketing/promotions'
     | '/marketing/transactional'
     | '/ota/guests'
     | '/ota/journey'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/marketing/in-property'
     | '/marketing/invites'
     | '/marketing/media'
+    | '/marketing/promotions'
     | '/marketing/transactional'
     | '/ota/guests'
     | '/ota/journey'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   MarketingInPropertyRoute: typeof MarketingInPropertyRoute
   MarketingInvitesRoute: typeof MarketingInvitesRoute
   MarketingMediaRoute: typeof MarketingMediaRoute
+  MarketingPromotionsRoute: typeof MarketingPromotionsRoute
   MarketingTransactionalRoute: typeof MarketingTransactionalRoute
 }
 
@@ -362,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingTransactionalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketing/promotions': {
+      id: '/marketing/promotions'
+      path: '/marketing/promotions'
+      fullPath: '/marketing/promotions'
+      preLoaderRoute: typeof MarketingPromotionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketing/media': {
       id: '/marketing/media'
       path: '/marketing/media'
@@ -419,6 +439,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketingInPropertyRoute: MarketingInPropertyRoute,
   MarketingInvitesRoute: MarketingInvitesRoute,
   MarketingMediaRoute: MarketingMediaRoute,
+  MarketingPromotionsRoute: MarketingPromotionsRoute,
   MarketingTransactionalRoute: MarketingTransactionalRoute,
 }
 export const routeTree = rootRouteImport
