@@ -651,3 +651,78 @@ export function timeAgo(ts: number) {
 
 export const fullTime = (ts: number) =>
   new Date(ts).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+
+/* --------------------------------------------- campaign promotions & media */
+
+/** A campaign carries at most one promotion, shared across its audiences. */
+export function campaignPromotionId(c: MarketingCampaign): string | null {
+  const direct = c.variants.direct;
+  const ota = c.variants.ota;
+  if (direct.promotionMode === "custom" && direct.promotionId) return direct.promotionId;
+  if (ota.promotionMode === "custom" && ota.promotionId) return ota.promotionId;
+  return null;
+}
+
+export function campaignPromotion(state: MarketingState, c: MarketingCampaign): Promotion | null {
+  const id = campaignPromotionId(c);
+  return state.promotions.find((p) => p.id === id) ?? null;
+}
+
+/** Which audiences the campaign promotion applies to. */
+export function campaignPromotionAudiences(c: MarketingCampaign): Record<AudienceKey, boolean> {
+  const id = campaignPromotionId(c);
+  const on = (v: Variant) => Boolean(id && v.promotionMode === "custom" && v.promotionId === id);
+  return { direct: on(c.variants.direct), ota: on(c.variants.ota) };
+}
+
+export function setCampaignPromotion(
+  campaignId: string,
+  promotionId: string | null,
+  audiences: Record<AudienceKey, boolean> = { direct: true, ota: true },
+) {
+  mutate((draft) => {
+    const c = draft.campaigns.find((x) => x.id === campaignId);
+    if (!c) return;
+    c.promotionId = promotionId;
+    c.promotionMode = promotionId ? "custom" : "none";
+    (["direct", "ota"] as AudienceKey[]).forEach((key) => {
+      const apply = Boolean(promotionId) && audiences[key];
+      c.variants[key].promotionMode = apply ? "custom" : "none";
+      c.variants[key].promotionId = apply ? promotionId : null;
+    });
+  });
+}
+
+/** Campaigns attached to a promotion. */
+export function promotionCampaigns(state: MarketingState, promotionId: string) {
+  return state.campaigns.filter((c) => campaignPromotionId(c) === promotionId);
+}
+
+/** Media attached to a campaign, shared across its audiences. */
+export function campaignMediaIds(c: MarketingCampaign): string[] {
+  return [...new Set([...(c.variants.direct.text.mediaIds ?? []), ...(c.variants.ota.text.mediaIds ?? [])])];
+}
+
+export function attachMediaToCampaign(campaignId: string, mediaId: string) {
+  mutate((draft) => {
+    const c = draft.campaigns.find((x) => x.id === campaignId);
+    if (!c) return;
+    (["direct", "ota"] as AudienceKey[]).forEach((key) => {
+      const ids = c.variants[key].text.mediaIds ?? [];
+      if (!ids.includes(mediaId)) c.variants[key].text.mediaIds = [...ids, mediaId];
+    });
+  });
+}
+
+export function detachMediaFromCampaign(campaignId: string, mediaId: string) {
+  mutate((draft) => {
+    const c = draft.campaigns.find((x) => x.id === campaignId);
+    if (!c) return;
+    (["direct", "ota"] as AudienceKey[]).forEach((key) => {
+      c.variants[key].text.mediaIds = (c.variants[key].text.mediaIds ?? []).filter((id) => id !== mediaId);
+    });
+  });
+}
+
+export const MEDIA_DRAG_TYPE = "application/x-directful-media";
+export const CAMPAIGN_DRAG_TYPE = "application/x-directful-campaign";
