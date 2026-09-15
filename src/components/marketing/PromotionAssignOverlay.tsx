@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { Check, GripVertical, Search, X } from "lucide-react";
+import { Check, Info, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  CAMPAIGN_DRAG_TYPE,
   GROUP_META,
-  campaignPromotionAudiences,
-  campaignPromotionId,
-  setCampaignPromotion,
+  promotionAudiencesOn,
+  setVariantPromotion,
   useMarketing,
+  variantPromotionId,
   type AudienceKey,
   type CampaignGroup,
   type MarketingCampaign,
+  type MarketingState,
   type Promotion,
 } from "@/lib/marketing";
 
@@ -20,25 +20,40 @@ const AUDIENCES: { key: AudienceKey; label: string }[] = [
   { key: "ota", label: "OTA" },
 ];
 
+/** Name of the promotion blocking a guest segment on this campaign, if any. */
+function blockedBy(state: MarketingState, campaign: MarketingCampaign, audience: AudienceKey, promotionId: string) {
+  const id = variantPromotionId(campaign, audience);
+  if (!id || id === promotionId) return null;
+  return state.promotions.find((p) => p.id === id)?.name ?? "another promotion";
+}
+
 /** Small square checkbox used for the guest-segment toggles. */
 function SegmentToggle({
   on,
   label,
+  disabled,
+  title,
   onChange,
 }: {
   on: boolean;
   label: string;
+  disabled?: boolean;
+  title?: string;
   onChange: (value: boolean) => void;
 }) {
   return (
     <button
       type="button"
+      disabled={disabled}
+      title={title}
       onClick={() => onChange(!on)}
       aria-pressed={on}
       className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
-        on
-          ? "border-brand/45 bg-brand-soft text-brand"
-          : "border-border bg-background text-muted-foreground hover:border-brand/30"
+        disabled
+          ? "cursor-not-allowed border-dashed border-border bg-muted/50 text-muted-foreground"
+          : on
+            ? "border-brand/45 bg-brand-soft text-brand"
+            : "border-border bg-background text-muted-foreground hover:border-brand/30"
       }`}
     >
       <span
@@ -49,14 +64,15 @@ function SegmentToggle({
         {on && <Check size={9} strokeWidth={3.5} />}
       </span>
       {label}
+      {disabled && <Info size={11} className="text-muted-foreground" />}
     </button>
   );
 }
 
 /**
- * Full-screen assignment surface for one promotion. Campaigns are dragged from
- * the right-hand list into one of the three automated message sections, then
- * checked on or off per guest segment.
+ * Assignment surface for one promotion. Each automated message section has an
+ * Assign campaign button; guest segments already used by another promotion on
+ * the same campaign stay locked and explain themselves.
  */
 export function PromotionAssignOverlay({
   promotion,
@@ -65,40 +81,28 @@ export function PromotionAssignOverlay({
   promotion: Promotion;
   onClose: () => void;
 }) {
-  const { campaigns } = useMarketing();
+  const state = useMarketing();
+  const { campaigns } = state;
+  const [picking, setPicking] = useState<CampaignGroup | null>(null);
   const [query, setQuery] = useState("");
-  const [overGroup, setOverGroup] = useState<CampaignGroup | null>(null);
 
-  const assigned = campaigns.filter((c) => campaignPromotionId(c) === promotion.id);
-  const q = query.trim().toLowerCase();
-  const available = campaigns.filter(
-    (c) => campaignPromotionId(c) === null && (!q || c.name.toLowerCase().includes(q)),
-  );
-
-  const drop = (event: React.DragEvent, group: CampaignGroup) => {
-    const id = event.dataTransfer.getData(CAMPAIGN_DRAG_TYPE);
-    setOverGroup(null);
-    if (!id) return;
-    const campaign = campaigns.find((c) => c.id === id);
-    if (!campaign || campaign.group !== group) return;
-    event.preventDefault();
-    setCampaignPromotion(id, promotion.id);
+  const openPicker = (group: CampaignGroup) => {
+    setPicking((current) => (current === group ? null : group));
+    setQuery("");
   };
 
-  const dragOver = (event: React.DragEvent, group: CampaignGroup) => {
-    if (!event.dataTransfer.types.includes(CAMPAIGN_DRAG_TYPE)) return;
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    setOverGroup(group);
+  const assignFree = (campaign: MarketingCampaign) => {
+    AUDIENCES.forEach(({ key }) => {
+      if (!variantPromotionId(campaign, key)) setVariantPromotion(campaign.id, key, promotion.id);
+    });
+    setPicking(null);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-canvas">
       <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-brand">
-            {assigned.length ? "Edit assignment" : "Assign campaigns"}
-          </p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-brand">Assign campaigns</p>
           <h2 className="truncate text-[17px] font-semibold text-card-foreground">{promotion.name}</h2>
           <p className="truncate text-[11.5px] text-muted-foreground">
             {promotion.detail} · {promotion.code}
@@ -112,21 +116,29 @@ export function PromotionAssignOverlay({
         </Button>
       </header>
 
-      <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto p-4 sm:p-6 lg:grid-cols-[1fr_300px] lg:items-start">
-        <div className="grid min-w-0 items-start gap-4 md:grid-cols-3">
+      <p className="flex items-start gap-2 border-b border-border bg-brand-soft/50 px-4 py-2 text-[11.5px] text-muted-foreground sm:px-6">
+        <Info size={13} className="mt-[1px] shrink-0 text-brand" />
+        Each campaign can carry one promotion per guest segment. If Direct is already used by another offer, only OTA
+        stays available here.
+      </p>
+
+      <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="grid items-start gap-4 md:grid-cols-3">
           {GROUPS.map((group) => {
-            const list = assigned.filter((c) => c.group === group);
-            const active = overGroup === group;
+            const list = campaigns.filter(
+              (c) => c.group === group && (promotionAudiencesOn(c, promotion.id).direct || promotionAudiencesOn(c, promotion.id).ota),
+            );
+            const q = query.trim().toLowerCase();
+            const available = campaigns.filter(
+              (c) =>
+                c.group === group &&
+                !list.includes(c) &&
+                AUDIENCES.some(({ key }) => !variantPromotionId(c, key)) &&
+                (!q || c.name.toLowerCase().includes(q)),
+            );
+
             return (
-              <section
-                key={group}
-                onDragOver={(event) => dragOver(event, group)}
-                onDragLeave={() => setOverGroup(null)}
-                onDrop={(event) => drop(event, group)}
-                className={`flex min-h-[220px] flex-col rounded-lg border bg-card p-3 shadow-card transition-colors ${
-                  active ? "border-brand bg-brand-soft/40 ring-2 ring-brand/25" : "border-border"
-                }`}
-              >
+              <section key={group} className="flex flex-col rounded-lg border border-border bg-card p-3 shadow-card">
                 <div className="flex items-center justify-between gap-2">
                   <p className="min-w-0 truncate text-[12.5px] font-semibold text-card-foreground">
                     {GROUP_META[group].title}
@@ -136,86 +148,103 @@ export function PromotionAssignOverlay({
                   </span>
                 </div>
 
-                <div className="mt-2.5 flex-1 space-y-2">
+                <div className="mt-2.5 space-y-2">
                   {list.map((campaign) => (
-                    <AssignedRow key={campaign.id} campaign={campaign} promotionId={promotion.id} />
+                    <AssignedRow key={campaign.id} campaign={campaign} promotion={promotion} state={state} />
                   ))}
                   {list.length === 0 && (
-                    <p className="grid min-h-[104px] place-items-center rounded-md border border-dashed border-border px-2 text-center text-[11.5px] text-muted-foreground">
-                      Drag a campaign here
+                    <p className="rounded-md border border-dashed border-border px-2 py-5 text-center text-[11.5px] text-muted-foreground">
+                      No campaigns yet
                     </p>
                   )}
                 </div>
+
+                <Button
+                  variant={picking === group ? "brand" : "outline"}
+                  size="sm"
+                  className="mt-2.5 w-full"
+                  onClick={() => openPicker(group)}
+                >
+                  {picking === group ? <X size={13} /> : <Plus size={13} />}
+                  {picking === group ? "Close" : "Assign campaign"}
+                </Button>
+
+                {picking === group && (
+                  <div className="mt-2.5 rounded-md border border-border bg-muted/40 p-2.5">
+                    <div className="relative">
+                      <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        autoFocus
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Search campaigns"
+                        className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-2.5 text-[12px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      />
+                    </div>
+                    <div className="mt-2 max-h-56 space-y-1.5 overflow-y-auto pr-1">
+                      {available.map((campaign) => {
+                        const free = AUDIENCES.filter(({ key }) => !variantPromotionId(campaign, key));
+                        const taken = AUDIENCES.filter(({ key }) => variantPromotionId(campaign, key));
+                        return (
+                          <button
+                            key={campaign.id}
+                            type="button"
+                            onClick={() => assignFree(campaign)}
+                            className="flex w-full items-center gap-2 rounded-md border border-border bg-background px-2.5 py-2 text-left transition-colors hover:border-brand/45"
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-[12px] font-medium text-card-foreground">
+                                {campaign.name}
+                              </span>
+                              <span className="block truncate text-[10.5px] text-muted-foreground">
+                                {free.map((a) => a.label).join(" + ")} available
+                                {taken.length > 0 &&
+                                  ` · ${taken.map((a) => a.label).join(", ")} on ${blockedBy(state, campaign, taken[0].key, promotion.id)}`}
+                              </span>
+                            </span>
+                            <Plus size={13} className="shrink-0 text-brand" />
+                          </button>
+                        );
+                      })}
+                      {available.length === 0 && (
+                        <p className="px-1 py-3 text-center text-[11.5px] text-muted-foreground">
+                          No campaigns left to assign here.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </section>
             );
           })}
         </div>
-
-        <aside className="flex min-w-0 flex-col rounded-lg border border-border bg-card p-3 shadow-card">
-          <p className="text-[12.5px] font-semibold text-card-foreground">Campaigns available</p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            A campaign can carry one promotion at a time.
-          </p>
-          <div className="relative mt-2.5">
-            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search campaigns"
-              className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-2.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-            />
-          </div>
-
-          <div className="mt-2.5 space-y-1.5 overflow-y-auto">
-            {available.map((campaign) => (
-              <div
-                key={campaign.id}
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.setData(CAMPAIGN_DRAG_TYPE, campaign.id);
-                  event.dataTransfer.effectAllowed = "move";
-                }}
-                className="flex cursor-grab items-center gap-2 rounded-md border border-border bg-background px-2.5 py-2 transition-colors hover:border-brand/45 active:cursor-grabbing"
-              >
-                <GripVertical size={13} className="shrink-0 text-muted-foreground" />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[12px] font-medium text-card-foreground">
-                    {campaign.name}
-                  </span>
-                  <span className="block truncate text-[10.5px] text-muted-foreground">
-                    {GROUP_META[campaign.group].title}
-                  </span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCampaignPromotion(campaign.id, promotion.id)}
-                  className="shrink-0 rounded-md border border-border px-2 py-1 text-[10.5px] font-semibold text-brand hover:border-brand/45"
-                >
-                  Add
-                </button>
-              </div>
-            ))}
-            {available.length === 0 && (
-              <p className="rounded-md border border-dashed border-border px-2.5 py-6 text-center text-[11.5px] text-muted-foreground">
-                No campaigns available.
-              </p>
-            )}
-          </div>
-        </aside>
       </div>
     </div>
   );
 }
 
-function AssignedRow({ campaign, promotionId }: { campaign: MarketingCampaign; promotionId: string }) {
-  const audiences = campaignPromotionAudiences(campaign);
+function AssignedRow({
+  campaign,
+  promotion,
+  state,
+}: {
+  campaign: MarketingCampaign;
+  promotion: Promotion;
+  state: MarketingState;
+}) {
+  const on = promotionAudiencesOn(campaign, promotion.id);
+  const removeAll = () =>
+    AUDIENCES.forEach(({ key }) => {
+      if (on[key]) setVariantPromotion(campaign.id, key, null);
+    });
+
   return (
     <div className="rounded-md border border-border bg-background px-2.5 py-2">
       <div className="flex items-start gap-2">
         <p className="min-w-0 flex-1 truncate text-[12px] font-medium text-card-foreground">{campaign.name}</p>
         <button
           type="button"
-          onClick={() => setCampaignPromotion(campaign.id, null)}
+          onClick={removeAll}
           aria-label={`Remove ${campaign.name}`}
           className="shrink-0 text-muted-foreground hover:text-destructive"
         >
@@ -223,18 +252,23 @@ function AssignedRow({ campaign, promotionId }: { campaign: MarketingCampaign; p
         </button>
       </div>
       <div className="mt-1.5 flex flex-wrap gap-1.5">
-        {AUDIENCES.map(({ key, label }) => (
-          <SegmentToggle
-            key={key}
-            on={audiences[key]}
-            label={label}
-            onChange={(value) => {
-              const next = { ...audiences, [key]: value };
-              if (!next.direct && !next.ota) setCampaignPromotion(campaign.id, null);
-              else setCampaignPromotion(campaign.id, promotionId, next);
-            }}
-          />
-        ))}
+        {AUDIENCES.map(({ key, label }) => {
+          const blocker = blockedBy(state, campaign, key, promotion.id);
+          return (
+            <SegmentToggle
+              key={key}
+              on={on[key]}
+              label={label}
+              disabled={Boolean(blocker)}
+              title={
+                blocker
+                  ? `${label} guests already use “${blocker}” on this campaign. One promotion per guest segment.`
+                  : undefined
+              }
+              onChange={(value) => setVariantPromotion(campaign.id, key, value ? promotion.id : null)}
+            />
+          );
+        })}
       </div>
     </div>
   );
