@@ -9,6 +9,7 @@ import {
   MessageSquareDashed,
   CheckSquare,
   Image as ImageIcon,
+  Gift,
   ChevronDown,
   Globe,
   Info,
@@ -39,7 +40,10 @@ const GROUPS: { label?: string; items: Item[] }[] = [
   },
   {
     label: "Marketing Assets",
-    items: [{ label: "Media", to: "/marketing/media", icon: ImageIcon }],
+    items: [
+      { label: "Media", to: "/marketing/media", icon: ImageIcon },
+      { label: "Promotions", to: "/marketing/promotions", icon: Gift },
+    ],
   },
 ];
 
@@ -48,6 +52,7 @@ const MOBILE_NAV = [
   { label: "Transactional", to: "/marketing/transactional" },
   { label: "In-property", to: "/marketing/in-property" },
   { label: "Media", to: "/marketing/media" },
+  { label: "Promotions", to: "/marketing/promotions" },
   { label: "Drip", to: "/campaign" },
 ];
 
