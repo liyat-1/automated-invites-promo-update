@@ -503,25 +503,31 @@ function migrateCampaign(c: MarketingCampaign): MarketingCampaign {
 function hydrate() {
   if (hydrated || typeof window === "undefined") return;
   hydrated = true;
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as MarketingState;
-      if (parsed?.campaigns?.length) {
-        // media urls come from bundled assets; always take the fresh ones
-        state = {
-          ...parsed,
-          campaigns: parsed.campaigns.map(migrateCampaign),
-          media: parsed.media?.length ? parsed.media : MEDIA,
-          templates: TEMPLATES,
-          promotions: parsed.promotions?.length ? parsed.promotions : PROMOTIONS,
-          globalPromotions: parsed.globalPromotions ?? { direct: "dining-10", ota: null },
-        };
+  const load = () => {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as MarketingState;
+        if (parsed?.campaigns?.length) {
+          // media urls come from bundled assets; always take the fresh ones
+          state = {
+            ...parsed,
+            campaigns: parsed.campaigns.map(migrateCampaign),
+            media: parsed.media?.length ? parsed.media : MEDIA,
+            templates: TEMPLATES,
+            promotions: parsed.promotions?.length ? parsed.promotions : PROMOTIONS,
+            globalPromotions: parsed.globalPromotions ?? { direct: "dining-10", ota: null },
+          };
+          emit();
+        }
       }
+    } catch {
+      /* ignore */
     }
-  } catch {
-    /* ignore */
-  }
+  };
+  // Load saved changes only after the first client render has committed, so
+  // hydration always matches the server-rendered seed state.
+  setTimeout(load, 0);
 }
 
 export function useMarketing(): MarketingState {
