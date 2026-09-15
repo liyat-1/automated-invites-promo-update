@@ -660,13 +660,20 @@ export const fullTime = (ts: number) =>
 
 /* --------------------------------------------- campaign promotions & media */
 
-/** A campaign carries at most one promotion, shared across its audiences. */
+/** The promotion attached to one guest segment of a campaign. */
+export function variantPromotionId(c: MarketingCampaign, audience: AudienceKey): string | null {
+  const v = c.variants[audience];
+  return v.promotionMode === "custom" && v.promotionId ? v.promotionId : null;
+}
+
+/** Both guest segments of a campaign with their own promotion id. */
+export function campaignPromotionIds(c: MarketingCampaign): Record<AudienceKey, string | null> {
+  return { direct: variantPromotionId(c, "direct"), ota: variantPromotionId(c, "ota") };
+}
+
+/** First promotion found on a campaign, used for counts and compact labels. */
 export function campaignPromotionId(c: MarketingCampaign): string | null {
-  const direct = c.variants.direct;
-  const ota = c.variants.ota;
-  if (direct.promotionMode === "custom" && direct.promotionId) return direct.promotionId;
-  if (ota.promotionMode === "custom" && ota.promotionId) return ota.promotionId;
-  return null;
+  return variantPromotionId(c, "direct") ?? variantPromotionId(c, "ota");
 }
 
 export function campaignPromotion(state: MarketingState, c: MarketingCampaign): Promotion | null {
@@ -674,11 +681,40 @@ export function campaignPromotion(state: MarketingState, c: MarketingCampaign): 
   return state.promotions.find((p) => p.id === id) ?? null;
 }
 
-/** Which audiences the campaign promotion applies to. */
+/** Resolved promotion per guest segment, for badges. */
+export function campaignPromotionsByAudience(
+  state: MarketingState,
+  c: MarketingCampaign,
+): Record<AudienceKey, Promotion | null> {
+  const find = (id: string | null) => state.promotions.find((p) => p.id === id) ?? null;
+  return { direct: find(variantPromotionId(c, "direct")), ota: find(variantPromotionId(c, "ota")) };
+}
+
+/** Which audiences of the campaign carry the given promotion. */
+export function promotionAudiencesOn(c: MarketingCampaign, promotionId: string): Record<AudienceKey, boolean> {
+  return {
+    direct: variantPromotionId(c, "direct") === promotionId,
+    ota: variantPromotionId(c, "ota") === promotionId,
+  };
+}
+
+/** Which audiences the campaign promotion applies to (legacy single-promo view). */
 export function campaignPromotionAudiences(c: MarketingCampaign): Record<AudienceKey, boolean> {
   const id = campaignPromotionId(c);
-  const on = (v: Variant) => Boolean(id && v.promotionMode === "custom" && v.promotionId === id);
-  return { direct: on(c.variants.direct), ota: on(c.variants.ota) };
+  return id ? promotionAudiencesOn(c, id) : { direct: false, ota: false };
+}
+
+/** Sets (or clears) the promotion for a single guest segment of a campaign. */
+export function setVariantPromotion(campaignId: string, audience: AudienceKey, promotionId: string | null) {
+  mutate((draft) => {
+    const c = draft.campaigns.find((x) => x.id === campaignId);
+    if (!c) return;
+    c.variants[audience].promotionMode = promotionId ? "custom" : "none";
+    c.variants[audience].promotionId = promotionId;
+    const any = variantPromotionId(c, "direct") ?? variantPromotionId(c, "ota");
+    c.promotionId = any;
+    c.promotionMode = any ? "custom" : "none";
+  });
 }
 
 export function setCampaignPromotion(
@@ -698,6 +734,7 @@ export function setCampaignPromotion(
     });
   });
 }
+
 
 /** Campaigns attached to a promotion. */
 export function promotionCampaigns(state: MarketingState, promotionId: string) {
