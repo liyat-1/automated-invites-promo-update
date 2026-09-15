@@ -42,3 +42,9 @@
 - [x] Expand content-rich template previews and structure-only layout choices without altering content
 - [x] Add PPTX, CSV, XLSX, and other representative media samples
 - [x] Polish and verify all marketing pages across desktop and mobile preview sizes
+
+## Promotion assignment rework
+
+- [ ] Simple promotion badge on campaign cards
+- [ ] Replace collapsible promotions page with flat list plus Assign/Edit button
+- [ ] Full overlay: three automated message sections as drop targets, draggable campaign list, Direct/OTA checkboxes
