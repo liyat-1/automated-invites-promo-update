@@ -87,9 +87,9 @@ export function CampaignCard({
       </div>
 
       {promotion && (
-        <div className="mx-4 mt-2.5 flex items-center gap-1.5">
-          <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/40 bg-brand-soft px-2 py-0.5 text-[10.5px] font-semibold text-brand" title={`${promotion.name} · ${promotion.detail}`}>
-            <Gift size={11} className="shrink-0" />
+        <div className="mx-4 mt-2 flex">
+          <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${promotion.name} · ${promotion.detail} · ${promotion.code}`}>
+            <Gift size={10} className="shrink-0" />
             <span className="truncate">{promotion.name}</span>
           </span>
         </div>
