@@ -112,8 +112,8 @@ export function PromotionAssignOverlay({
         </Button>
       </header>
 
-      <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto p-4 sm:p-6 lg:grid-cols-[1fr_300px]">
-        <div className="grid min-w-0 gap-4 md:grid-cols-3">
+      <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto p-4 sm:p-6 lg:grid-cols-[1fr_300px] lg:items-start">
+        <div className="grid min-w-0 items-start gap-4 md:grid-cols-3">
           {GROUPS.map((group) => {
             const list = assigned.filter((c) => c.group === group);
             const active = overGroup === group;
@@ -141,7 +141,7 @@ export function PromotionAssignOverlay({
                     <AssignedRow key={campaign.id} campaign={campaign} promotionId={promotion.id} />
                   ))}
                   {list.length === 0 && (
-                    <p className="grid h-full min-h-[120px] place-items-center rounded-md border border-dashed border-border px-2 text-center text-[11.5px] text-muted-foreground">
+                    <p className="grid min-h-[104px] place-items-center rounded-md border border-dashed border-border px-2 text-center text-[11.5px] text-muted-foreground">
                       Drag a campaign here
                     </p>
                   )}
