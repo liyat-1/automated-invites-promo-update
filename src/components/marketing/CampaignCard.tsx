@@ -10,7 +10,7 @@ import {
   STRATEGY_LABEL,
   attachMediaToCampaign,
   campaignMediaIds,
-  campaignPromotion,
+  campaignPromotionsByAudience,
   detachMediaFromCampaign,
   fullTime,
   initialsOf,
@@ -45,7 +45,7 @@ export function CampaignCard({
   const [over, setOver] = useState(false);
   useEffect(() => setMounted(true), []);
   const hasCustomization = Object.values(campaign.variants).some((variant) => variant.customization.text || variant.customization.email);
-  const promotion = campaignPromotion(state, campaign);
+  const promos = campaignPromotionsByAudience(state, campaign);
   const mediaIds = campaignMediaIds(campaign);
   const attached = mediaIds.map((id) => state.media.find((item) => item.id === id)).filter(Boolean) as { id: string; name: string }[];
 
@@ -86,14 +86,27 @@ export function CampaignCard({
         <Switch checked={campaign.enabled} onCheckedChange={onToggle} aria-label={`${campaign.enabled ? "Disable" : "Enable"} ${campaign.name}`} />
       </div>
 
-      {promotion && (
-        <div className="mx-4 mt-2 flex">
-          <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${promotion.name} · ${promotion.detail} · ${promotion.code}`}>
-            <Gift size={10} className="shrink-0" />
-            <span className="truncate">{promotion.name}</span>
-          </span>
+      {(promos.direct || promos.ota) && (
+        <div className="mx-4 mt-2 flex flex-wrap gap-1.5">
+          {promos.direct && promos.direct.id === promos.ota?.id ? (
+            <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${promos.direct.name} · ${promos.direct.detail} · ${promos.direct.code}`}>
+              <Gift size={10} className="shrink-0" />
+              <span className="truncate">{promos.direct.name}</span>
+            </span>
+          ) : (
+            (["direct", "ota"] as const).map((key) =>
+              promos[key] ? (
+                <span key={key} className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${AUDIENCE_LABEL[key]} · ${promos[key]!.name} · ${promos[key]!.code}`}>
+                  <Gift size={10} className="shrink-0" />
+                  <span className="shrink-0 uppercase tracking-wide opacity-70">{key === "direct" ? "Direct" : "OTA"}</span>
+                  <span className="truncate">{promos[key]!.name}</span>
+                </span>
+              ) : null,
+            )
+          )}
         </div>
       )}
+
 
       <div className="mx-4 mt-3 rounded-md border border-border bg-secondary/50 px-3 py-2">
         <p className="flex items-center gap-1.5 text-[12px] font-semibold text-card-foreground">
