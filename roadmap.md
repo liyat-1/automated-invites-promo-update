@@ -45,6 +45,8 @@
 
 ## Promotion assignment rework
 
-- [ ] Simple promotion badge on campaign cards
-- [ ] Replace collapsible promotions page with flat list plus Assign/Edit button
-- [ ] Full overlay: three automated message sections as drop targets, draggable campaign list, Direct/OTA checkboxes
+- [x] Simple promotion badge on campaign cards
+- [x] Replace collapsible promotions page with flat list plus Assign/Edit button
+- [x] Full overlay: three automated message sections as drop targets, draggable campaign list, Direct/OTA checkboxes
+- [x] Fixed hydration mismatch when saved marketing state differs from the seed (deferred localStorage load)
+- [x] Verified badge, assign overlay, add/remove and Direct/OTA toggles at desktop and mobile widths — no console errors
