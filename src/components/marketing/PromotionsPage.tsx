@@ -136,7 +136,7 @@ export function PromotionsPage() {
                   className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </label>
-              <label className="grid gap-1 lg:col-span-2">
+              <label className="grid gap-1 sm:col-span-2">
                 <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Tagline on the offer banner</span>
                 <input
                   value={tagline}
