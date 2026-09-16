@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CalendarClock, ChevronDown, Gift, Image, Layers, MessageSquare, Mail, Shuffle } from "lucide-react";
 import { StrategyOverlay } from "./StrategyOverlay";
-import { CampaignPromoManager } from "./CampaignPromoManager";
+import { PromoDropOverlay } from "./PromoDropOverlay";
 import { MediaAssignOverlay } from "./MediaAssignOverlay";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,7 +62,7 @@ function Panel({
  * Collapsible tool rail above the campaign grid: channel strategy, promotions
  * and text media. Each panel explains itself and opens its own full overlay.
  */
-export function MarketingTools({ group, campaigns }: { group: CampaignGroup; campaigns: MarketingCampaign[] }) {
+export function MarketingTools({ campaigns }: { group?: CampaignGroup; campaigns: MarketingCampaign[] }) {
   const { promotions } = useMarketing();
   const [open, setOpen] = useState<"strategy" | "promo" | "media" | null>(null);
   const [overlay, setOverlay] = useState<"strategy" | "promo" | "media" | null>(null);
@@ -120,7 +120,8 @@ export function MarketingTools({ group, campaigns }: { group: CampaignGroup; cam
       >
         <p className="text-[11.5px] leading-relaxed text-muted-foreground">
           A campaign can carry only one promotion per guest segment, so Direct and OTA guests can each get a different
-          offer. Some offers run between set dates and expire on their own, others run with no end date.
+          offer. Drag an offer onto a whole campaign, or onto just Direct or OTA. Some offers run between set dates and
+          expire on their own, others run with no end date.
         </p>
         <ul className="mt-2.5 space-y-1.5">
           {usedPromos.map((promotion) => (
@@ -160,7 +161,7 @@ export function MarketingTools({ group, campaigns }: { group: CampaignGroup; cam
       </Panel>
 
       <StrategyOverlay open={overlay === "strategy"} campaigns={campaigns} onClose={() => setOverlay(null)} />
-      {overlay === "promo" && <CampaignPromoManager open group={group} onClose={() => setOverlay(null)} />}
+      {overlay === "promo" && <PromoDropOverlay campaigns={campaigns} onClose={() => setOverlay(null)} />}
       {overlay === "media" && <MediaAssignOverlay campaigns={campaigns} onClose={() => setOverlay(null)} />}
     </div>
   );

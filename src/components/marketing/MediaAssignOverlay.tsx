@@ -100,8 +100,8 @@ export function MediaAssignOverlay({
         These files are sent with the text message only. Images and video travel as MMS, documents are sent as a link.
       </p>
 
-      <div className="grid min-h-0 flex-1 md:grid-cols-[320px_1fr]">
-        <aside className="flex min-h-0 flex-col border-b border-border bg-card p-4 md:border-b-0 md:border-r">
+      <div className="grid min-h-0 flex-1 overflow-hidden md:grid-cols-[300px_1fr]">
+        <aside className="flex min-h-0 flex-col overflow-hidden border-b border-border bg-card p-4 md:border-b-0 md:border-r">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-[13px] font-semibold text-card-foreground">Media</h3>
             <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
@@ -143,7 +143,7 @@ export function MediaAssignOverlay({
                 onDragEnd={() => setDragging(null)}
                 className="cursor-grab overflow-hidden rounded-md border border-border bg-background transition-colors hover:border-brand/45 active:cursor-grabbing"
               >
-                <div className="aspect-[4/3] bg-muted">
+                <div className="h-16 bg-muted">
                   <MediaThumb item={item} />
                 </div>
                 <p className="truncate px-1.5 py-1 text-[10.5px] text-muted-foreground">{item.name}</p>
