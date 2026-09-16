@@ -191,6 +191,12 @@ export function PromotionsPage() {
                   <p className="truncate text-[11.5px] text-muted-foreground">
                     {promotion.detail} · {promotion.code}
                   </p>
+                  <p className="mt-0.5 truncate text-[10.5px] text-muted-foreground">
+                    {CODE_TYPE_LABEL[promotion.codeType ?? "promo"]}
+                    {promotion.discountPercent ? ` · ${promotion.discountPercent}% off` : ""}
+                    {promotion.minNights ? ` · min ${promotion.minNights} night${promotion.minNights === 1 ? "" : "s"}` : ""} ·{" "}
+                    {promotionValidity(promotion)}
+                  </p>
                 </div>
                 <span
                   className={`hidden shrink-0 rounded-sm px-2.5 py-1 text-[11px] font-semibold sm:inline ${
