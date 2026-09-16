@@ -103,7 +103,7 @@ export function PromotionsPage() {
                 Save
               </Button>
             </div>
-            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2">
               <label className="grid gap-1">
                 <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Code type</span>
                 <select
