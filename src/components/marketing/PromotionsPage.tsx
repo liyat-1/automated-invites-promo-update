@@ -13,6 +13,12 @@ export function PromotionsPage() {
   const [name, setName] = useState("");
   const [detail, setDetail] = useState("");
   const [code, setCode] = useState("");
+  const [codeType, setCodeType] = useState<"promo" | "rate" | "corporate">("promo");
+  const [discount, setDiscount] = useState("");
+  const [minNights, setMinNights] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
 
   const q = query.trim().toLowerCase();
   const list = promotions.filter(
@@ -29,11 +35,23 @@ export function PromotionsPage() {
         name: clean,
         detail: detail.trim() || "Custom hotel offer.",
         code: code.trim() || "OFFER",
+        codeType,
+        discountPercent: discount ? Number(discount) : undefined,
+        minNights: minNights ? Number(minNights) : undefined,
+        tagline: tagline.trim() || undefined,
+        startsAt: startsAt || undefined,
+        endsAt: endsAt || undefined,
       }),
     );
     setName("");
     setDetail("");
     setCode("");
+    setCodeType("promo");
+    setDiscount("");
+    setMinNights("");
+    setTagline("");
+    setStartsAt("");
+    setEndsAt("");
     setCreating(false);
   };
 
