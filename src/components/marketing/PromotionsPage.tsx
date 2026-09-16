@@ -3,7 +3,7 @@ import { Gift, Pencil, Plus, Search, X } from "lucide-react";
 import { MarketingShell } from "./MarketingShell";
 import { PromotionAssignOverlay } from "./PromotionAssignOverlay";
 import { Button } from "@/components/ui/button";
-import { campaignPromotionId, mutate, uid, useMarketing } from "@/lib/marketing";
+import { CODE_TYPE_LABEL, campaignPromotionId, mutate, promotionValidity, uid, useMarketing } from "@/lib/marketing";
 
 export function PromotionsPage() {
   const { campaigns, promotions } = useMarketing();
