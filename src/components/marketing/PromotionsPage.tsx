@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Gift, Pencil, Plus, Search, X } from "lucide-react";
 import { MarketingShell } from "./MarketingShell";
 import { PromotionAssignOverlay } from "./PromotionAssignOverlay";
+import { PromoBanner } from "./PromoBanner";
 import { Button } from "@/components/ui/button";
 import { CODE_TYPE_LABEL, campaignPromotionId, mutate, promotionValidity, uid, useMarketing } from "@/lib/marketing";
 
