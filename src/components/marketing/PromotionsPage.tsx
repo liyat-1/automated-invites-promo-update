@@ -19,6 +19,7 @@ export function PromotionsPage() {
   const [tagline, setTagline] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  const [durationDays, setDurationDays] = useState("");
 
   const q = query.trim().toLowerCase();
   const list = promotions.filter(
@@ -41,6 +42,7 @@ export function PromotionsPage() {
         tagline: tagline.trim() || undefined,
         startsAt: startsAt || undefined,
         endsAt: endsAt || undefined,
+        durationDays: durationDays ? Number(durationDays) : undefined,
       }),
     );
     setName("");
@@ -52,6 +54,7 @@ export function PromotionsPage() {
     setTagline("");
     setStartsAt("");
     setEndsAt("");
+    setDurationDays("");
     setCreating(false);
   };
 
@@ -160,6 +163,16 @@ export function PromotionsPage() {
                   />
                 </label>
               </div>
+              <label className="grid gap-1">
+                <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">How long it lasts (days)</span>
+                <input
+                  value={durationDays}
+                  onChange={(event) => setDurationDays(event.target.value.replace(/[^0-9]/g, ""))}
+                  inputMode="numeric"
+                  placeholder="e.g. 30"
+                  className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                />
+              </label>
             </div>
             <p className="mt-2 text-[10.5px] text-muted-foreground">Leave the dates empty and the offer runs with no end date.</p>
           </div>
