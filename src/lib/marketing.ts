@@ -187,7 +187,42 @@ export type Promotion = {
   name: string;
   detail: string;
   code: string;
+  /** What the code represents: a promo code, a rate code or a corporate ID. */
+  codeType?: "promo" | "rate" | "corporate";
+  /** Percentage taken off the rate. */
+  discountPercent?: number;
+  /** Minimum nights the guest must stay for the offer to apply. */
+  minNights?: number;
+  /** Short line shown on the offer banner. */
+  tagline?: string;
+  /** ISO dates. When absent the offer runs with no end date. */
+  startsAt?: string;
+  endsAt?: string;
 };
+
+export const CODE_TYPE_LABEL: Record<NonNullable<Promotion["codeType"]>, string> = {
+  promo: "Promo code",
+  rate: "Rate code",
+  corporate: "Corporate ID",
+};
+
+/** Plain-language validity line for a promotion. */
+export function promotionValidity(p: Promotion): string {
+  if (!p.startsAt && !p.endsAt) return "No expiry date";
+  const fmt = (v?: string) => (v ? new Date(v).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : null);
+  if (p.startsAt && p.endsAt) {
+    const days = Math.max(1, Math.round((new Date(p.endsAt).getTime() - new Date(p.startsAt).getTime()) / 86400000));
+    return `${fmt(p.startsAt)} – ${fmt(p.endsAt)} · ${days} day${days === 1 ? "" : "s"}`;
+  }
+  if (p.endsAt) return `Ends ${fmt(p.endsAt)}`;
+  return `Starts ${fmt(p.startsAt)}`;
+}
+
+/** True when the promotion has already expired. */
+export function promotionExpired(p: Promotion): boolean {
+  return Boolean(p.endsAt && new Date(p.endsAt).getTime() < Date.now());
+}
+
 
 export type MarketingState = {
   campaigns: MarketingCampaign[];
@@ -769,3 +804,5 @@ export function detachMediaFromCampaign(campaignId: string, mediaId: string) {
 
 export const MEDIA_DRAG_TYPE = "application/x-directful-media";
 export const CAMPAIGN_DRAG_TYPE = "application/x-directful-campaign";
+export const PROMO_DRAG_TYPE = "application/x-directful-promotion";
+
