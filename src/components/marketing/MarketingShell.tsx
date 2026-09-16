@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
@@ -13,6 +14,8 @@ import {
   ChevronDown,
   Globe,
   Info,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import propertyPhoto from "../../assets/pool-dusk.jpg";
 import { CURRENT_USER, initialsOf } from "@/lib/marketing";
@@ -68,20 +71,52 @@ export function MarketingShell({
   children: React.ReactNode;
 }) {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <div className="flex min-h-dvh bg-canvas text-foreground">
-      <aside className="sticky top-0 hidden h-dvh w-[272px] shrink-0 flex-col overflow-y-auto border-r border-border bg-card lg:flex">
-        <div className="flex items-center gap-2.5 border-b border-border px-5 py-4">
+      <aside
+        className={`sticky top-0 hidden h-dvh shrink-0 flex-col overflow-y-auto border-r border-border bg-card transition-[width] lg:flex ${
+          collapsed ? "w-[68px]" : "w-[272px]"
+        }`}
+      >
+        <div className={`flex items-center gap-2.5 border-b border-border py-4 ${collapsed ? "justify-center px-2" : "px-5"}`}>
           <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand text-[14px] font-bold text-brand-foreground">
             D
           </span>
-          <div className="min-w-0">
-            <p className="text-[13.5px] font-semibold tracking-tight text-card-foreground">Directful</p>
-            <p className="text-[10.5px] text-muted-foreground">Guest messaging</p>
-          </div>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-[13.5px] font-semibold tracking-tight text-card-foreground">Directful</p>
+              <p className="text-[10.5px] text-muted-foreground">Guest messaging</p>
+            </div>
+          )}
+          {!collapsed && (
+            <button
+              type="button"
+              aria-label="Collapse sidebar"
+              title="Collapse sidebar"
+              onClick={() => setCollapsed(true)}
+              className="grid size-7 shrink-0 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <PanelLeftClose size={16} />
+            </button>
+          )}
         </div>
+        {collapsed && (
+          <div className="flex justify-center border-b border-border py-2">
+            <button
+              type="button"
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
+              onClick={() => setCollapsed(false)}
+              className="grid size-8 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+          </div>
+        )}
 
+        {!collapsed && (
         <div className="border-b border-border px-3 py-3">
           <button className="group flex w-full items-center gap-2.5 rounded-lg border border-border bg-background/70 p-2 text-left transition-colors hover:border-brand/45 hover:bg-muted/60">
             <img
@@ -99,18 +134,21 @@ export function MarketingShell({
             <ChevronDown size={15} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-y-0.5" />
           </button>
         </div>
+        )}
 
         <nav className="flex-1 px-2.5 py-3">
           {GROUPS.map((group, gi) => (
             <div key={gi} className={gi > 0 ? "mt-4 border-t border-border pt-4" : ""}>
-              {group.label && (
+              {group.label && !collapsed && (
                 <p className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {group.label}
                 </p>
               )}
               {group.items.map((item) => {
                 const active = item.to ? pathname.startsWith(item.to) : false;
-                const cls = `flex w-full items-center gap-2.5 rounded-md px-2.5 py-[7px] text-left text-[12.5px] transition-colors ${
+                const cls = `flex w-full items-center gap-2.5 rounded-md py-[7px] text-left text-[12.5px] transition-colors ${
+                  collapsed ? "justify-center px-0" : "px-2.5"
+                } ${
                   active
                     ? "bg-brand-soft font-semibold text-brand"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -118,15 +156,15 @@ export function MarketingShell({
                 const inner = (
                   <>
                     <item.icon size={16} className={active ? "text-brand" : "text-muted-foreground"} />
-                    <span className="min-w-0 flex-1 leading-snug">{item.label}</span>
+                    {!collapsed && <span className="min-w-0 flex-1 leading-snug">{item.label}</span>}
                   </>
                 );
                 return item.to ? (
-                  <Link key={item.label} to={item.to} className={cls}>
+                  <Link key={item.label} to={item.to} className={cls} title={item.label}>
                     {inner}
                   </Link>
                 ) : (
-                  <button key={item.label} type="button" className={cls}>
+                  <button key={item.label} type="button" className={cls} title={item.label}>
                     {inner}
                   </button>
                 );
@@ -140,12 +178,14 @@ export function MarketingShell({
             <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-foreground text-[11px] font-semibold text-background">
               {initialsOf(CURRENT_USER.name)}
             </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-semibold text-card-foreground">{CURRENT_USER.name}</p>
-              <p className="truncate text-[10.5px] text-muted-foreground">Property administrator</p>
-            </div>
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[12px] font-semibold text-card-foreground">{CURRENT_USER.name}</p>
+                <p className="truncate text-[10.5px] text-muted-foreground">Property administrator</p>
+              </div>
+            )}
           </div>
-          <p className="px-2 pt-2 text-[10px] text-muted-foreground">Dashboard version 7.73.0</p>
+          {!collapsed && <p className="px-2 pt-2 text-[10px] text-muted-foreground">Dashboard version 7.73.0</p>}
         </div>
       </aside>
 
