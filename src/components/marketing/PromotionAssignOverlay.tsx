@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Info, Plus, Search, X } from "lucide-react";
+import { Check, GripVertical, Info, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   GROUP_META,
