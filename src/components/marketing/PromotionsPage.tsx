@@ -77,7 +77,8 @@ export function PromotionsPage() {
         </div>
 
         {creating && (
-          <div className="mt-4 rounded-md border border-border bg-card p-4 shadow-card">
+          <div className="mt-4 grid gap-4 rounded-md border border-border bg-card p-4 shadow-card lg:grid-cols-[1fr_250px]">
+            <div>
             <div className="grid gap-2 sm:grid-cols-[1.2fr_1.6fr_0.7fr_auto]">
               <input
                 value={name}
