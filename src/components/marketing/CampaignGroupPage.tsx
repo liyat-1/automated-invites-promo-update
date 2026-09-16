@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Copy, Gift, Layers, MessageSquareText, RotateCcw } from "lucide-react";
+import { Copy, MessageSquareText, RotateCcw } from "lucide-react";
 import { MarketingShell } from "./MarketingShell";
 import { CampaignCard } from "./CampaignCard";
 import { CampaignEditor } from "./CampaignEditor";
