@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Check, GripVertical, Info, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  CAMPAIGN_DRAG_TYPE,
   GROUP_META,
   promotionAudiencesOn,
   setVariantPromotion,
