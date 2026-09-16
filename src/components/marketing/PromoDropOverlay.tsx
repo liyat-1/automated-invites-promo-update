@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { CalendarClock, Gift, Info, Search, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  AUDIENCES,
   CODE_TYPE_LABEL,
   PROMO_DRAG_TYPE,
   campaignPromotionIds,
@@ -16,6 +15,7 @@ import {
 } from "@/lib/marketing";
 
 const AUDIENCE_LABEL: Record<AudienceKey, string> = { direct: "Direct", ota: "OTA" };
+const AUDIENCE_KEYS: AudienceKey[] = ["direct", "ota"];
 
 /**
  * Full overlay for attaching offers. Promotions live on the left and are
@@ -150,15 +150,15 @@ export function PromoDropOverlay({
                     <p className="text-[10.5px] text-muted-foreground">Drop here for the whole campaign</p>
                   </div>
                   <div className="grid gap-2 p-3 sm:grid-cols-2">
-                    {AUDIENCES.map((audience) => {
-                      const key = `${campaign.id}:${audience.key}`;
-                      const promotion: Promotion | null = byId(ids[audience.key]);
+                    {AUDIENCE_KEYS.map((audience) => {
+                      const key = `${campaign.id}:${audience}`;
+                      const promotion: Promotion | null = byId(ids[audience]);
                       return (
                         <div
-                          key={audience.key}
+                          key={audience}
                           onDragOver={(event) => allow(event, key)}
                           onDragLeave={() => setOver((c) => (c === key ? null : c))}
-                          onDrop={(event) => drop(event, campaign.id, [audience.key])}
+                          onDrop={(event) => drop(event, campaign.id, [audience])}
                           className={`rounded-sm border-2 border-dashed px-2.5 py-2 transition-colors ${
                             over === key
                               ? "border-brand bg-brand-soft"
@@ -168,12 +168,12 @@ export function PromoDropOverlay({
                           }`}
                         >
                           <p className="flex items-center justify-between gap-1 text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">
-                            {AUDIENCE_LABEL[audience.key]} guests
+                            {AUDIENCE_LABEL[audience]} guests
                             {promotion && (
                               <button
                                 type="button"
-                                aria-label={`Remove offer from ${AUDIENCE_LABEL[audience.key]} guests`}
-                                onClick={() => setVariantPromotion(campaign.id, audience.key, null)}
+                                aria-label={`Remove offer from ${AUDIENCE_LABEL[audience]} guests`}
+                                onClick={() => setVariantPromotion(campaign.id, audience, null)}
                                 className="hover:text-destructive"
                               >
                                 <X size={11} />
