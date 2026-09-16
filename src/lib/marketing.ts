@@ -198,6 +198,8 @@ export type Promotion = {
   /** ISO dates. When absent the offer runs with no end date. */
   startsAt?: string;
   endsAt?: string;
+  /** How many days the offer stays valid for a guest once they receive it. */
+  durationDays?: number;
 };
 
 export const CODE_TYPE_LABEL: Record<NonNullable<Promotion["codeType"]>, string> = {
@@ -206,16 +208,24 @@ export const CODE_TYPE_LABEL: Record<NonNullable<Promotion["codeType"]>, string>
   corporate: "Corporate ID",
 };
 
+/** How long the offer lasts once a guest receives it. */
+export function promotionDuration(p: Promotion): string {
+  if (p.durationDays) return `Lasts ${p.durationDays} day${p.durationDays === 1 ? "" : "s"} per guest`;
+  return "Lasts as long as the offer runs";
+}
+
 /** Plain-language validity line for a promotion. */
 export function promotionValidity(p: Promotion): string {
-  if (!p.startsAt && !p.endsAt) return "No expiry date";
-  const fmt = (v?: string) => (v ? new Date(v).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : null);
+  const fmt = (v?: string) =>
+    v ? new Date(v).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : null;
+  const duration = p.durationDays ? ` · ${p.durationDays} day${p.durationDays === 1 ? "" : "s"} per guest` : "";
+  if (!p.startsAt && !p.endsAt) return `No end date${duration}`;
   if (p.startsAt && p.endsAt) {
     const days = Math.max(1, Math.round((new Date(p.endsAt).getTime() - new Date(p.startsAt).getTime()) / 86400000));
-    return `${fmt(p.startsAt)} – ${fmt(p.endsAt)} · ${days} day${days === 1 ? "" : "s"}`;
+    return `${fmt(p.startsAt)} – ${fmt(p.endsAt)} · runs ${days} day${days === 1 ? "" : "s"}${duration}`;
   }
-  if (p.endsAt) return `Ends ${fmt(p.endsAt)}`;
-  return `Starts ${fmt(p.startsAt)}`;
+  if (p.endsAt) return `Ends ${fmt(p.endsAt)}${duration}`;
+  return `Starts ${fmt(p.startsAt)}${duration}`;
 }
 
 /** True when the promotion has already expired. */
