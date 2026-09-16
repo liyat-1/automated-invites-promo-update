@@ -176,6 +176,26 @@ export function PromotionsPage() {
               </label>
             </div>
             <p className="mt-2 text-[10.5px] text-muted-foreground">Leave the dates empty and the offer runs with no end date.</p>
+            </div>
+            <div className="lg:sticky lg:top-2">
+              <p className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Guest preview
+              </p>
+              <PromoBanner
+                promotion={{
+                  name: name || "New promotion",
+                  detail,
+                  code: code || "OFFER",
+                  codeType,
+                  discountPercent: discount ? Number(discount) : undefined,
+                  minNights: minNights ? Number(minNights) : undefined,
+                  tagline: tagline || undefined,
+                  startsAt: startsAt || undefined,
+                  endsAt: endsAt || undefined,
+                  durationDays: durationDays ? Number(durationDays) : undefined,
+                }}
+              />
+            </div>
           </div>
         )}
 
