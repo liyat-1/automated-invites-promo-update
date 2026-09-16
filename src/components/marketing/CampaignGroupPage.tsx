@@ -98,8 +98,6 @@ export function CampaignGroupPage({ group }: { group: CampaignGroup }) {
         </section>
       </div>
 
-      <StrategyOverlay open={strategyOpen} campaigns={list} onClose={() => setStrategyOpen(false)} />
-      <CampaignPromoManager open={promoOpen} group={group} onClose={() => setPromoOpen(false)} />
       <EditCampaignDialog campaign={activeCampaign} open={Boolean(editConfirm)} onClose={() => setEditConfirm(null)} onContinue={() => { const id = editConfirm; setEditConfirm(null); if (id) setEditing(id); }} />
       {editing && <CampaignEditor id={editing} onClose={() => setEditing(null)} />}
       <TestCampaignDialog campaign={campaigns.find((campaign) => campaign.id === testing) ?? null} open={Boolean(testing)} onClose={() => setTesting(null)} />
