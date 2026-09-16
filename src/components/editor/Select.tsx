@@ -97,7 +97,7 @@ export function Select<T extends string | number>({
             if (e.key === "ArrowUp") setActive((i) => Math.max(0, i - 1));
             if (e.key === "Enter") commit(options[active].value);
           }}
-          className={`absolute z-[80] mt-1.5 max-h-72 w-full min-w-[13rem] overflow-y-auto rounded-xl border border-zinc-200 bg-white p-1 shadow-xl shadow-zinc-900/10 ${
+          className={`absolute z-[80] mt-1.5 max-h-72 w-full min-w-[13rem] overflow-y-auto rounded-lg border border-zinc-200 bg-white p-1 shadow-xl shadow-zinc-900/10 ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >

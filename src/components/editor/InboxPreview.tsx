@@ -53,7 +53,7 @@ export function InboxPreview({ campaign }: { campaign: Campaign }) {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-300 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-sm">
         {/* Client chrome */}
         <div
           className="flex items-center gap-3 border-b px-4 py-2.5"

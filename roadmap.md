@@ -50,3 +50,13 @@
 - [x] Full overlay: three automated message sections as drop targets, draggable campaign list, Direct/OTA checkboxes
 - [x] Fixed hydration mismatch when saved marketing state differs from the seed (deferred localStorage load)
 - [x] Verified badge, assign overlay, add/remove and Direct/OTA toggles at desktop and mobile widths — no console errors
+
+## Collapsible tools section and sharp edges
+
+- [x] Wire the collapsible Manage channel strategy / Manage promo / Text media section into the campaign pages (replaces the old media rail and duplicate header buttons)
+- [x] Manage promo panel opens the per-segment promo manager (Direct/OTA rows with searchable change)
+- [x] Promotion creation form with code type, discount %, minimum nights, tagline, and validity dates
+- [x] Promotion cards show code type, discount, minimum nights, and validity
+- [x] Square off remaining pill and large-radius shapes across marketing (max 8px, most 3px)
+- [x] Remove superseded MediaDock / PromoDropOverlay / StrategyBar components
+- [x] Type check passes; verify tools section, promo creation, and rounding at desktop and mobile widths

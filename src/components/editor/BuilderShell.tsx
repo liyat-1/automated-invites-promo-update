@@ -352,7 +352,7 @@ export function BuilderShell({
   if (minimized) {
     return (
       <div className="grid min-h-dvh place-items-end bg-zinc-900/70 p-4">
-        <div className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-2xl">
+        <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 shadow-2xl">
           <Pencil size={15} className="text-zinc-400" />
           <div className="flex flex-col">
             <input
@@ -386,7 +386,7 @@ export function BuilderShell({
         role="dialog"
         aria-label="Campaign editor"
         className={`flex min-h-0 flex-1 flex-col overflow-hidden bg-zinc-100 shadow-2xl ${
-          expanded ? "" : "md:rounded-2xl md:border md:border-zinc-300"
+          expanded ? "" : "md:rounded-lg md:border md:border-zinc-300"
         }`}
       >
         {/* Modal chrome */}
@@ -537,7 +537,7 @@ export function BuilderShell({
               >
                 <div className="space-y-5 p-4">
                   <div className="space-y-2">
-                    <div className="flex justify-center rounded-xl border border-zinc-200 p-3">
+                    <div className="flex justify-center rounded-lg border border-zinc-200 p-3">
                       <TemplatePreview campaign={campaign} />
                     </div>
                     <p className="text-[13px] font-semibold text-zinc-900">{activeLayout.name}</p>
@@ -773,7 +773,7 @@ export function BuilderShell({
             role="dialog"
             aria-label="Choose a template"
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
               <p className="text-[14px] font-semibold">Change template</p>
@@ -795,7 +795,7 @@ export function BuilderShell({
                     setLayoutPicker(false);
                   }}
                   aria-pressed={layout === l.id}
-                  className={`flex w-full items-center gap-4 rounded-xl border p-3 text-left transition-colors ${
+                  className={`flex w-full items-center gap-4 rounded-lg border p-3 text-left transition-colors ${
                     layout === l.id
                       ? "border-zinc-900 bg-zinc-50"
                       : "border-zinc-200 hover:border-zinc-300"

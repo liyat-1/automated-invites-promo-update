@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CalendarClock, ChevronDown, Gift, Image, Layers, MessageSquare, Mail, Shuffle } from "lucide-react";
 import { StrategyOverlay } from "./StrategyOverlay";
-import { PromoDropOverlay } from "./PromoDropOverlay";
+import { CampaignPromoManager } from "./CampaignPromoManager";
 import { MediaAssignOverlay } from "./MediaAssignOverlay";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,7 +160,7 @@ export function MarketingTools({ group, campaigns }: { group: CampaignGroup; cam
       </Panel>
 
       <StrategyOverlay open={overlay === "strategy"} campaigns={campaigns} onClose={() => setOverlay(null)} />
-      {overlay === "promo" && <PromoDropOverlay group={group} onClose={() => setOverlay(null)} />}
+      {overlay === "promo" && <CampaignPromoManager open group={group} onClose={() => setOverlay(null)} />}
       {overlay === "media" && <MediaAssignOverlay campaigns={campaigns} onClose={() => setOverlay(null)} />}
     </div>
   );

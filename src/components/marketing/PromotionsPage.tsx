@@ -3,7 +3,7 @@ import { Gift, Pencil, Plus, Search, X } from "lucide-react";
 import { MarketingShell } from "./MarketingShell";
 import { PromotionAssignOverlay } from "./PromotionAssignOverlay";
 import { Button } from "@/components/ui/button";
-import { campaignPromotionId, mutate, uid, useMarketing } from "@/lib/marketing";
+import { CODE_TYPE_LABEL, campaignPromotionId, mutate, promotionValidity, uid, useMarketing } from "@/lib/marketing";
 
 export function PromotionsPage() {
   const { campaigns, promotions } = useMarketing();
@@ -13,6 +13,12 @@ export function PromotionsPage() {
   const [name, setName] = useState("");
   const [detail, setDetail] = useState("");
   const [code, setCode] = useState("");
+  const [codeType, setCodeType] = useState<"promo" | "rate" | "corporate">("promo");
+  const [discount, setDiscount] = useState("");
+  const [minNights, setMinNights] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [startsAt, setStartsAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
 
   const q = query.trim().toLowerCase();
   const list = promotions.filter(
@@ -29,11 +35,23 @@ export function PromotionsPage() {
         name: clean,
         detail: detail.trim() || "Custom hotel offer.",
         code: code.trim() || "OFFER",
+        codeType,
+        discountPercent: discount ? Number(discount) : undefined,
+        minNights: minNights ? Number(minNights) : undefined,
+        tagline: tagline.trim() || undefined,
+        startsAt: startsAt || undefined,
+        endsAt: endsAt || undefined,
       }),
     );
     setName("");
     setDetail("");
     setCode("");
+    setCodeType("promo");
+    setDiscount("");
+    setMinNights("");
+    setTagline("");
+    setStartsAt("");
+    setEndsAt("");
     setCreating(false);
   };
 
@@ -56,28 +74,94 @@ export function PromotionsPage() {
         </div>
 
         {creating && (
-          <div className="mt-4 grid gap-2 rounded-lg border border-border bg-card p-4 shadow-card sm:grid-cols-[1.2fr_1.6fr_0.7fr_auto]">
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Promotion name"
-              className="rounded-md border border-input bg-background px-3 py-2 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-            />
-            <input
-              value={detail}
-              onChange={(event) => setDetail(event.target.value)}
-              placeholder="Short description"
-              className="rounded-md border border-input bg-background px-3 py-2 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-            />
-            <input
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              placeholder="CODE"
-              className="rounded-md border border-input bg-background px-3 py-2 text-[12.5px] uppercase outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-            />
-            <Button variant="brand" size="sm" onClick={create}>
-              Save
-            </Button>
+          <div className="mt-4 rounded-md border border-border bg-card p-4 shadow-card">
+            <div className="grid gap-2 sm:grid-cols-[1.2fr_1.6fr_0.7fr_auto]">
+              <input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Promotion name"
+                className="rounded-sm border border-input bg-background px-3 py-2 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
+              <input
+                value={detail}
+                onChange={(event) => setDetail(event.target.value)}
+                placeholder="Short description"
+                className="rounded-sm border border-input bg-background px-3 py-2 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
+              <input
+                value={code}
+                onChange={(event) => setCode(event.target.value)}
+                placeholder="CODE"
+                className="rounded-sm border border-input bg-background px-3 py-2 text-[12.5px] uppercase outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
+              <Button variant="brand" size="sm" onClick={create}>
+                Save
+              </Button>
+            </div>
+            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="grid gap-1">
+                <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Code type</span>
+                <select
+                  value={codeType}
+                  onChange={(event) => setCodeType(event.target.value as typeof codeType)}
+                  className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                >
+                  <option value="promo">Promo code</option>
+                  <option value="rate">Rate code</option>
+                  <option value="corporate">Corporate ID</option>
+                </select>
+              </label>
+              <label className="grid gap-1">
+                <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Discount %</span>
+                <input
+                  value={discount}
+                  onChange={(event) => setDiscount(event.target.value.replace(/[^0-9]/g, ""))}
+                  inputMode="numeric"
+                  placeholder="e.g. 15"
+                  className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                />
+              </label>
+              <label className="grid gap-1">
+                <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Minimum nights</span>
+                <input
+                  value={minNights}
+                  onChange={(event) => setMinNights(event.target.value.replace(/[^0-9]/g, ""))}
+                  inputMode="numeric"
+                  placeholder="e.g. 2"
+                  className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                />
+              </label>
+              <label className="grid gap-1 lg:col-span-2">
+                <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Tagline on the offer banner</span>
+                <input
+                  value={tagline}
+                  onChange={(event) => setTagline(event.target.value)}
+                  placeholder="e.g. Stay longer and save"
+                  className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                />
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="grid gap-1">
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Valid from</span>
+                  <input
+                    type="date"
+                    value={startsAt}
+                    onChange={(event) => setStartsAt(event.target.value)}
+                    className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  />
+                </label>
+                <label className="grid gap-1">
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Until</span>
+                  <input
+                    type="date"
+                    value={endsAt}
+                    onChange={(event) => setEndsAt(event.target.value)}
+                    className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  />
+                </label>
+              </div>
+            </div>
+            <p className="mt-2 text-[10.5px] text-muted-foreground">Leave the dates empty and the offer runs with no end date.</p>
           </div>
         )}
 
@@ -107,9 +191,15 @@ export function PromotionsPage() {
                   <p className="truncate text-[11.5px] text-muted-foreground">
                     {promotion.detail} · {promotion.code}
                   </p>
+                  <p className="mt-0.5 truncate text-[10.5px] text-muted-foreground">
+                    {CODE_TYPE_LABEL[promotion.codeType ?? "promo"]}
+                    {promotion.discountPercent ? ` · ${promotion.discountPercent}% off` : ""}
+                    {promotion.minNights ? ` · min ${promotion.minNights} night${promotion.minNights === 1 ? "" : "s"}` : ""} ·{" "}
+                    {promotionValidity(promotion)}
+                  </p>
                 </div>
                 <span
-                  className={`hidden shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline ${
+                  className={`hidden shrink-0 rounded-sm px-2.5 py-1 text-[11px] font-semibold sm:inline ${
                     count ? "bg-brand-soft text-brand" : "bg-muted text-muted-foreground"
                   }`}
                 >

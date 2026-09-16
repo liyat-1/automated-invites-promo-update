@@ -143,7 +143,7 @@ export function PromotionAssignOverlay({
                   <p className="min-w-0 truncate text-[12.5px] font-semibold text-card-foreground">
                     {GROUP_META[group].title}
                   </p>
-                  <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
+                  <span className="shrink-0 rounded-sm bg-muted px-2 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
                     {list.length}
                   </span>
                 </div>

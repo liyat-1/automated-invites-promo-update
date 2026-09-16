@@ -137,7 +137,7 @@ export function MarketingShell({
 
         <div className="border-t border-border px-3 py-3">
           <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-foreground text-[11px] font-semibold text-background">
+            <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-foreground text-[11px] font-semibold text-background">
               {initialsOf(CURRENT_USER.name)}
             </span>
             <div className="min-w-0 flex-1">
@@ -154,11 +154,11 @@ export function MarketingShell({
           <h1 className="truncate text-[18px] font-semibold tracking-tight text-card-foreground">{title}</h1>
           <div className="flex items-center gap-3 text-muted-foreground sm:gap-4">
             <Info size={17} className="hidden sm:block" />
-            <span className="hidden rounded-full border border-border px-2.5 py-1 text-[11.5px] text-muted-foreground lg:inline">
+            <span className="hidden rounded-sm border border-border px-2.5 py-1 text-[11.5px] text-muted-foreground lg:inline">
               View as client
             </span>
             <Globe size={17} />
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-foreground text-[11px] font-semibold text-background lg:hidden">
+            <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-foreground text-[11px] font-semibold text-background lg:hidden">
               {initialsOf(CURRENT_USER.name)}
             </span>
           </div>
@@ -171,7 +171,7 @@ export function MarketingShell({
               <Link
                 key={item.to}
                 to={item.to}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                className={`shrink-0 rounded-sm px-3 py-1.5 text-[12px] font-medium transition-colors ${
                   active ? "bg-brand-soft text-brand" : "bg-muted text-muted-foreground"
                 }`}
               >

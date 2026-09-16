@@ -281,7 +281,7 @@ export function MediaLibraryPage() {
               setDragging(false);
               upload(e.dataTransfer.files);
             }}
-            className={`mt-4 rounded-xl border p-4 transition-colors sm:p-5 ${
+            className={`mt-4 rounded-lg border p-4 transition-colors sm:p-5 ${
               dragging ? "border-brand bg-brand-soft" : "border-border bg-card shadow-card"
             }`}
           >

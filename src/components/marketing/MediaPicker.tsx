@@ -142,7 +142,7 @@ export function MediaPicker({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-foreground/45 p-4 backdrop-blur-[2px]">
-      <div className="flex max-h-[82vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border bg-card shadow-float">
+      <div className="flex max-h-[82vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-border bg-card shadow-float">
         <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-3.5">
           <div className="min-w-0">
             <h2 className="text-[15px] font-semibold tracking-tight text-card-foreground">Media library</h2>

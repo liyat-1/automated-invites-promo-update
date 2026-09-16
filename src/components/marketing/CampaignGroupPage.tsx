@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Copy, Gift, Layers, MessageSquareText, RotateCcw } from "lucide-react";
+import { Copy, MessageSquareText, RotateCcw } from "lucide-react";
 import { MarketingShell } from "./MarketingShell";
 import { CampaignCard } from "./CampaignCard";
 import { CampaignEditor } from "./CampaignEditor";
 import { EditCampaignDialog } from "./EditCampaignDialog";
 import { ConfirmRevertDialog, TestCampaignDialog } from "./MarketingDialogs";
-import { CampaignPromoManager } from "./CampaignPromoManager";
-import { StrategyOverlay } from "./StrategyOverlay";
-import { MediaDock } from "./MediaDock";
+import { MarketingTools } from "./MarketingTools";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
@@ -27,8 +25,6 @@ export function CampaignGroupPage({ group }: { group: CampaignGroup }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [editConfirm, setEditConfirm] = useState<string | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
-  const [strategyOpen, setStrategyOpen] = useState(false);
-  const [promoOpen, setPromoOpen] = useState(false);
   const [revertTarget, setRevertTarget] = useState<string | "global" | null>(null);
   const allEnabled = list.length > 0 && list.every((campaign) => campaign.enabled);
   const activeCampaign = campaigns.find((campaign) => campaign.id === editConfirm) ?? null;
@@ -75,7 +71,7 @@ export function CampaignGroupPage({ group }: { group: CampaignGroup }) {
         </div>
 
         <div className="mt-5">
-          <MediaDock />
+          <MarketingTools group={group} campaigns={list} />
         </div>
 
         <section className="mt-5">
@@ -83,8 +79,6 @@ export function CampaignGroupPage({ group }: { group: CampaignGroup }) {
             <div><h3 className="text-[15px] font-semibold text-foreground">{meta.title}</h3><p className="text-[11.5px] text-muted-foreground">{list.filter((campaign) => campaign.enabled).length} active · {list.length} total</p></div>
             <div className="flex flex-wrap items-center gap-2">
               <Button variant="ghost" size="sm" onClick={() => setRevertTarget("global")}><RotateCcw size={14} />Revert to suggested content</Button>
-              <Button variant="outline" size="sm" onClick={() => setPromoOpen(true)}><Gift size={14} />Manage promo</Button>
-              <Button variant="outline" size="sm" onClick={() => setStrategyOpen(true)}><Layers size={15} />Manage channel strategy</Button>
               <Button variant="outline" size="sm" onClick={() => mutate((draft) => draft.campaigns.forEach((campaign) => { if (campaign.group === group) campaign.enabled = !allEnabled; }))}>{allEnabled ? "Disable all" : "Enable all campaigns"}</Button>
             </div>
           </div>
@@ -104,8 +98,6 @@ export function CampaignGroupPage({ group }: { group: CampaignGroup }) {
         </section>
       </div>
 
-      <StrategyOverlay open={strategyOpen} campaigns={list} onClose={() => setStrategyOpen(false)} />
-      <CampaignPromoManager open={promoOpen} group={group} onClose={() => setPromoOpen(false)} />
       <EditCampaignDialog campaign={activeCampaign} open={Boolean(editConfirm)} onClose={() => setEditConfirm(null)} onContinue={() => { const id = editConfirm; setEditConfirm(null); if (id) setEditing(id); }} />
       {editing && <CampaignEditor id={editing} onClose={() => setEditing(null)} />}
       <TestCampaignDialog campaign={campaigns.find((campaign) => campaign.id === testing) ?? null} open={Boolean(testing)} onClose={() => setTesting(null)} />
