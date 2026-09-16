@@ -83,19 +83,46 @@ export function PromotionAssignOverlay({
 }) {
   const state = useMarketing();
   const { campaigns } = state;
-  const [picking, setPicking] = useState<CampaignGroup | null>(null);
+  const [drawer, setDrawer] = useState(false);
   const [query, setQuery] = useState("");
+  const [dragging, setDragging] = useState<MarketingCampaign | null>(null);
+  const [over, setOver] = useState<CampaignGroup | null>(null);
 
-  const openPicker = (group: CampaignGroup) => {
-    setPicking((current) => (current === group ? null : group));
-    setQuery("");
-  };
+  const assignedIn = (group: CampaignGroup) =>
+    campaigns.filter((c) => {
+      const on = promotionAudiencesOn(c, promotion.id);
+      return c.group === group && (on.direct || on.ota);
+    });
+
+  const isFree = (c: MarketingCampaign) => AUDIENCES.some(({ key }) => !variantPromotionId(c, key));
+  const q = query.trim().toLowerCase();
+  const available = campaigns.filter(
+    (c) =>
+      isFree(c) &&
+      !promotionAudiencesOn(c, promotion.id).direct &&
+      !promotionAudiencesOn(c, promotion.id).ota &&
+      (!q || c.name.toLowerCase().includes(q)),
+  );
 
   const assignFree = (campaign: MarketingCampaign) => {
     AUDIENCES.forEach(({ key }) => {
       if (!variantPromotionId(campaign, key)) setVariantPromotion(campaign.id, key, promotion.id);
     });
-    setPicking(null);
+  };
+
+  const allow = (event: React.DragEvent, group: CampaignGroup) => {
+    if (!dragging || dragging.group !== group) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    setOver(group);
+  };
+
+  const drop = (event: React.DragEvent, group: CampaignGroup) => {
+    if (!dragging || dragging.group !== group) return;
+    event.preventDefault();
+    assignFree(dragging);
+    setDragging(null);
+    setOver(null);
   };
 
   return (
@@ -108,8 +135,9 @@ export function PromotionAssignOverlay({
             {promotion.detail} · {promotion.code}
           </p>
         </div>
-        <Button variant="brand" size="sm" onClick={onClose}>
-          Done
+        <Button variant={drawer ? "outline" : "brand"} size="sm" onClick={() => setDrawer((v) => !v)}>
+          {drawer ? <X size={13} /> : <Plus size={13} />}
+          {drawer ? "Close campaigns" : "Assign campaign"}
         </Button>
         <Button variant="ghost" size="icon" className="size-8" aria-label="Close" onClick={onClose}>
           <X size={16} />
@@ -118,106 +146,130 @@ export function PromotionAssignOverlay({
 
       <p className="flex items-start gap-2 border-b border-border bg-brand-soft/50 px-4 py-2 text-[11.5px] text-muted-foreground sm:px-6">
         <Info size={13} className="mt-[1px] shrink-0 text-brand" />
-        Each campaign can carry one promotion per guest segment. If Direct is already used by another offer, only OTA
-        stays available here.
+        Open the campaign list and drag a campaign into its message section. Each campaign carries one offer per guest
+        segment, so if Direct is already used by another offer, only OTA stays available here.
       </p>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-        <div className="grid items-start gap-4 md:grid-cols-3">
-          {GROUPS.map((group) => {
-            const list = campaigns.filter(
-              (c) => c.group === group && (promotionAudiencesOn(c, promotion.id).direct || promotionAudiencesOn(c, promotion.id).ota),
-            );
-            const q = query.trim().toLowerCase();
-            const available = campaigns.filter(
-              (c) =>
-                c.group === group &&
-                !list.includes(c) &&
-                AUDIENCES.some(({ key }) => !variantPromotionId(c, key)) &&
-                (!q || c.name.toLowerCase().includes(q)),
-            );
-
-            return (
-              <section key={group} className="flex flex-col rounded-lg border border-border bg-card p-3 shadow-card">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="min-w-0 truncate text-[12.5px] font-semibold text-card-foreground">
-                    {GROUP_META[group].title}
-                  </p>
-                  <span className="shrink-0 rounded-sm bg-muted px-2 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
-                    {list.length}
-                  </span>
-                </div>
-
-                <div className="mt-2.5 space-y-2">
-                  {list.map((campaign) => (
-                    <AssignedRow key={campaign.id} campaign={campaign} promotion={promotion} state={state} />
-                  ))}
-                  {list.length === 0 && (
-                    <p className="rounded-md border border-dashed border-border px-2 py-5 text-center text-[11.5px] text-muted-foreground">
-                      No campaigns yet
-                    </p>
-                  )}
-                </div>
-
-                <Button
-                  variant={picking === group ? "brand" : "outline"}
-                  size="sm"
-                  className="mt-2.5 w-full"
-                  onClick={() => openPicker(group)}
+      <div className="flex min-h-0 flex-1">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="grid items-start gap-4 md:grid-cols-3">
+            {GROUPS.map((group) => {
+              const list = assignedIn(group);
+              const armed = Boolean(dragging && dragging.group === group);
+              return (
+                <section
+                  key={group}
+                  onDragOver={(event) => allow(event, group)}
+                  onDragLeave={() => setOver((c) => (c === group ? null : c))}
+                  onDrop={(event) => drop(event, group)}
+                  className={`flex flex-col rounded-lg border-2 border-dashed bg-card p-3 shadow-card transition-colors ${
+                    over === group
+                      ? "border-brand bg-brand-soft"
+                      : armed
+                        ? "border-brand/45"
+                        : "border-border"
+                  }`}
                 >
-                  {picking === group ? <X size={13} /> : <Plus size={13} />}
-                  {picking === group ? "Close" : "Assign campaign"}
-                </Button>
-
-                {picking === group && (
-                  <div className="mt-2.5 rounded-md border border-border bg-muted/40 p-2.5">
-                    <div className="relative">
-                      <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      <input
-                        autoFocus
-                        value={query}
-                        onChange={(event) => setQuery(event.target.value)}
-                        placeholder="Search campaigns"
-                        className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-2.5 text-[12px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                      />
-                    </div>
-                    <div className="mt-2 max-h-56 space-y-1.5 overflow-y-auto pr-1">
-                      {available.map((campaign) => {
-                        const free = AUDIENCES.filter(({ key }) => !variantPromotionId(campaign, key));
-                        const taken = AUDIENCES.filter(({ key }) => variantPromotionId(campaign, key));
-                        return (
-                          <button
-                            key={campaign.id}
-                            type="button"
-                            onClick={() => assignFree(campaign)}
-                            className="flex w-full items-center gap-2 rounded-md border border-border bg-background px-2.5 py-2 text-left transition-colors hover:border-brand/45"
-                          >
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate text-[12px] font-medium text-card-foreground">
-                                {campaign.name}
-                              </span>
-                              <span className="block truncate text-[10.5px] text-muted-foreground">
-                                {free.map((a) => a.label).join(" + ")} available
-                                {taken.length > 0 &&
-                                  ` · ${taken.map((a) => a.label).join(", ")} on ${blockedBy(state, campaign, taken[0].key, promotion.id)}`}
-                              </span>
-                            </span>
-                            <Plus size={13} className="shrink-0 text-brand" />
-                          </button>
-                        );
-                      })}
-                      {available.length === 0 && (
-                        <p className="px-1 py-3 text-center text-[11.5px] text-muted-foreground">
-                          No campaigns left to assign here.
-                        </p>
-                      )}
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-[12.5px] font-semibold text-card-foreground">
+                      {GROUP_META[group].title}
+                    </p>
+                    <span className="shrink-0 rounded-sm bg-muted px-2 py-0.5 text-[10.5px] font-semibold text-muted-foreground">
+                      {list.length}
+                    </span>
                   </div>
-                )}
-              </section>
-            );
-          })}
+
+                  <div className="mt-2.5 space-y-2">
+                    {list.map((campaign) => (
+                      <AssignedRow key={campaign.id} campaign={campaign} promotion={promotion} state={state} />
+                    ))}
+                    {list.length === 0 && (
+                      <p className="rounded-md border border-dashed border-border px-2 py-6 text-center text-[11.5px] text-muted-foreground">
+                        {armed ? "Drop the campaign here" : "Drag a campaign here"}
+                      </p>
+                    )}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
         </div>
+
+        {drawer && (
+          <aside className="flex w-[280px] shrink-0 flex-col border-l border-border bg-card p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[12.5px] font-semibold text-card-foreground">Campaigns</p>
+              <button
+                type="button"
+                aria-label="Close campaign list"
+                onClick={() => setDrawer(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="relative mt-2">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                autoFocus
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search campaigns"
+                className="w-full rounded-sm border border-input bg-background py-1.5 pl-8 pr-2.5 text-[12px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
+            </div>
+            <p className="mt-2 text-[10.5px] text-muted-foreground">
+              Drag a card into its message section, or click it to add.
+            </p>
+            <div className="mt-2 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
+              {available.map((campaign) => {
+                const free = AUDIENCES.filter(({ key }) => !variantPromotionId(campaign, key));
+                const taken = AUDIENCES.filter(({ key }) => variantPromotionId(campaign, key));
+                return (
+                  <article
+                    key={campaign.id}
+                    draggable
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData(CAMPAIGN_DRAG_TYPE, campaign.id);
+                      event.dataTransfer.setData("text/plain", campaign.id);
+                      event.dataTransfer.effectAllowed = "copy";
+                      setDragging(campaign);
+                    }}
+                    onDragEnd={() => {
+                      setDragging(null);
+                      setOver(null);
+                    }}
+                    onClick={() => assignFree(campaign)}
+                    className={`cursor-grab rounded-sm border bg-background px-2.5 py-2 transition-colors active:cursor-grabbing ${
+                      dragging?.id === campaign.id ? "border-brand bg-brand-soft" : "border-border hover:border-brand/45"
+                    }`}
+                  >
+                    <p className="flex items-center gap-1.5 truncate text-[12px] font-medium text-card-foreground">
+                      <GripVertical size={12} className="shrink-0 text-muted-foreground" />
+                      <span className="truncate">{campaign.name}</span>
+                    </p>
+                    <p className="mt-0.5 truncate pl-[18px] text-[10.5px] text-muted-foreground">
+                      {GROUP_META[campaign.group].title}
+                    </p>
+                    <p className="truncate pl-[18px] text-[10.5px] text-muted-foreground">
+                      {free.map((a) => a.label).join(" + ")} available
+                      {taken.length > 0 &&
+                        ` · ${taken.map((a) => a.label).join(", ")} on ${blockedBy(state, campaign, taken[0].key, promotion.id)}`}
+                    </p>
+                  </article>
+                );
+              })}
+              {available.length === 0 && (
+                <p className="px-1 py-4 text-center text-[11.5px] text-muted-foreground">
+                  No campaigns left to assign.
+                </p>
+              )}
+            </div>
+            <Button variant="brand" size="sm" className="mt-2.5" onClick={onClose}>
+              Done
+            </Button>
+          </aside>
+        )}
       </div>
     </div>
   );
