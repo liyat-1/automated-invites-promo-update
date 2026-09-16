@@ -233,7 +233,7 @@ export function RichTextEditor({
   );
 
   const SwatchGrid = ({ kind }: { kind: "fore" | "hilite" }) => (
-    <div className="absolute left-0 top-full z-[90] mt-1.5 w-[13.5rem] rounded-xl border border-zinc-200 bg-white p-2.5 shadow-xl shadow-zinc-900/10">
+    <div className="absolute left-0 top-full z-[90] mt-1.5 w-[13.5rem] rounded-lg border border-zinc-200 bg-white p-2.5 shadow-xl shadow-zinc-900/10">
       <p className="mb-2 text-[11px] font-medium text-zinc-500">
         {kind === "fore" ? "Text colour" : "Highlight"}
       </p>
@@ -276,7 +276,7 @@ export function RichTextEditor({
       {label && (
         <span className="block text-[12px] font-medium text-zinc-600">{label}</span>
       )}
-      <div className="overflow-visible rounded-xl border border-zinc-200 bg-white focus-within:border-zinc-900 focus-within:ring-2 focus-within:ring-zinc-900/10">
+      <div className="overflow-visible rounded-lg border border-zinc-200 bg-white focus-within:border-zinc-900 focus-within:ring-2 focus-within:ring-zinc-900/10">
         <div className="flex flex-wrap items-center gap-0.5 rounded-t-xl border-b border-zinc-100 bg-zinc-50/80 px-2 py-1.5">
           {Toolbar()}
         </div>
@@ -374,7 +374,7 @@ export function RichTextEditor({
         <div
           role="toolbar"
           aria-label="Selection formatting"
-          className="fixed z-[95] flex items-center gap-0.5 rounded-xl border border-zinc-200 bg-white px-1.5 py-1.5 shadow-2xl shadow-zinc-900/20"
+          className="fixed z-[95] flex items-center gap-0.5 rounded-lg border border-zinc-200 bg-white px-1.5 py-1.5 shadow-2xl shadow-zinc-900/20"
           style={{ left: bubble.x, top: bubble.y - 10, transform: "translate(-50%,-100%)" }}
         >
           {Toolbar(true)}

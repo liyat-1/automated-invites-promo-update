@@ -35,7 +35,7 @@ export function TemplateLibrary({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-foreground/45 p-4 backdrop-blur-[2px]">
-      <div className="flex max-h-[86vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border bg-card shadow-float">
+      <div className="flex max-h-[86vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-border bg-card shadow-float">
         <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-3.5">
           <div className="min-w-0">
             <h2 className="text-[15px] font-semibold tracking-tight text-card-foreground">Template library</h2>
@@ -66,7 +66,7 @@ export function TemplateLibrary({
                 key={c}
                 onClick={() => setCat(c)}
                 aria-pressed={cat === c}
-                className={`rounded-full px-3 py-1 text-[12px] font-medium transition-colors ${
+                className={`rounded-sm px-3 py-1 text-[12px] font-medium transition-colors ${
                   cat === c
                     ? "bg-foreground text-background"
                     : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
@@ -98,7 +98,7 @@ export function TemplateLibrary({
                     <img src={t.hero} alt={`${t.name} email preview`} loading="lazy" width={480} height={200} className="h-20 w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
                     <div className="space-y-1.5 px-3 py-2.5"><div className="line-clamp-1 text-[8px] font-semibold text-card-foreground">{t.heading}</div><div className="line-clamp-2 text-[6.5px] leading-relaxed text-muted-foreground">{t.body}</div><span className="mt-1.5 inline-block rounded-sm px-2 py-1 text-[6px] font-semibold text-brand-foreground" style={{ background: t.accent }}>{t.ctaLabel}</span></div>
                   </div>
-                  <span className="absolute left-2 top-2 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground shadow-sm backdrop-blur">
+                  <span className="absolute left-2 top-2 rounded-sm bg-background/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground shadow-sm backdrop-blur">
                     {t.category}
                   </span>
                   {active && (

@@ -53,7 +53,7 @@ export function FloatingCard({
       ref={ref}
       role="dialog"
       aria-label={title}
-      className="fixed z-[80] flex max-h-[min(70vh,34rem)] w-[20.5rem] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white/95 shadow-2xl shadow-zinc-900/25 backdrop-blur"
+      className="fixed z-[80] flex max-h-[min(70vh,34rem)] w-[20.5rem] flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white/95 shadow-2xl shadow-zinc-900/25 backdrop-blur"
       style={{ left: pos.left, top: pos.top }}
       onClick={(e) => e.stopPropagation()}
     >

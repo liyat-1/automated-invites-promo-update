@@ -89,14 +89,14 @@ export function CampaignCard({
       {(promos.direct || promos.ota) && (
         <div className="mx-4 mt-2 flex flex-wrap gap-1.5">
           {promos.direct && promos.direct.id === promos.ota?.id ? (
-            <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${promos.direct.name} · ${promos.direct.detail} · ${promos.direct.code}`}>
+            <span className="inline-flex min-w-0 items-center gap-1 rounded-sm bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${promos.direct.name} · ${promos.direct.detail} · ${promos.direct.code}`}>
               <Gift size={10} className="shrink-0" />
               <span className="truncate">{promos.direct.name}</span>
             </span>
           ) : (
             (["direct", "ota"] as const).map((key) =>
               promos[key] ? (
-                <span key={key} className="inline-flex min-w-0 items-center gap-1 rounded-full bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${AUDIENCE_LABEL[key]} · ${promos[key]!.name} · ${promos[key]!.code}`}>
+                <span key={key} className="inline-flex min-w-0 items-center gap-1 rounded-sm bg-brand-soft px-2 py-[3px] text-[10.5px] font-semibold text-brand" title={`${AUDIENCE_LABEL[key]} · ${promos[key]!.name} · ${promos[key]!.code}`}>
                   <Gift size={10} className="shrink-0" />
                   <span className="shrink-0 uppercase tracking-wide opacity-70">{key === "direct" ? "Direct" : "OTA"}</span>
                   <span className="truncate">{promos[key]!.name}</span>
@@ -124,7 +124,7 @@ export function CampaignCard({
         ) : (
           <div className="flex flex-wrap gap-1.5">
             {attached.map((item) => (
-              <span key={item.id} className="inline-flex max-w-full items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-[10.5px] text-card-foreground">
+              <span key={item.id} className="inline-flex max-w-full items-center gap-1 rounded-sm border border-border bg-background px-2 py-0.5 text-[10.5px] text-card-foreground">
                 <Paperclip size={10} className="shrink-0 text-muted-foreground" />
                 <span className="max-w-[110px] truncate">{item.name}</span>
                 <button type="button" onClick={() => detachMediaFromCampaign(campaign.id, item.id)} aria-label={`Remove ${item.name}`} className="text-muted-foreground hover:text-foreground">

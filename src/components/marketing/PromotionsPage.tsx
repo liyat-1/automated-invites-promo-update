@@ -193,7 +193,7 @@ export function PromotionsPage() {
                   </p>
                 </div>
                 <span
-                  className={`hidden shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline ${
+                  className={`hidden shrink-0 rounded-sm px-2.5 py-1 text-[11px] font-semibold sm:inline ${
                     count ? "bg-brand-soft text-brand" : "bg-muted text-muted-foreground"
                   }`}
                 >
