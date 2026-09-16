@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Gift, Pencil, Plus, Search, X } from "lucide-react";
 import { MarketingShell } from "./MarketingShell";
 import { PromotionAssignOverlay } from "./PromotionAssignOverlay";
+import { PromoBanner } from "./PromoBanner";
 import { Button } from "@/components/ui/button";
 import { CODE_TYPE_LABEL, campaignPromotionId, mutate, promotionValidity, uid, useMarketing } from "@/lib/marketing";
 
@@ -77,7 +78,8 @@ export function PromotionsPage() {
         </div>
 
         {creating && (
-          <div className="mt-4 rounded-md border border-border bg-card p-4 shadow-card">
+          <div className="mt-4 grid gap-4 rounded-md border border-border bg-card p-4 shadow-card lg:grid-cols-[1fr_250px]">
+            <div>
             <div className="grid gap-2 sm:grid-cols-[1.2fr_1.6fr_0.7fr_auto]">
               <input
                 value={name}
@@ -101,7 +103,7 @@ export function PromotionsPage() {
                 Save
               </Button>
             </div>
-            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-3 grid gap-2 border-t border-border pt-3 sm:grid-cols-2">
               <label className="grid gap-1">
                 <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Code type</span>
                 <select
@@ -134,7 +136,7 @@ export function PromotionsPage() {
                   className="rounded-sm border border-input bg-background px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 />
               </label>
-              <label className="grid gap-1 lg:col-span-2">
+              <label className="grid gap-1 sm:col-span-2">
                 <span className="text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">Tagline on the offer banner</span>
                 <input
                   value={tagline}
@@ -175,6 +177,26 @@ export function PromotionsPage() {
               </label>
             </div>
             <p className="mt-2 text-[10.5px] text-muted-foreground">Leave the dates empty and the offer runs with no end date.</p>
+            </div>
+            <div className="lg:sticky lg:top-2">
+              <p className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Guest preview
+              </p>
+              <PromoBanner
+                promotion={{
+                  name: name || "New promotion",
+                  detail,
+                  code: code || "OFFER",
+                  codeType,
+                  discountPercent: discount ? Number(discount) : undefined,
+                  minNights: minNights ? Number(minNights) : undefined,
+                  tagline: tagline || undefined,
+                  startsAt: startsAt || undefined,
+                  endsAt: endsAt || undefined,
+                  durationDays: durationDays ? Number(durationDays) : undefined,
+                }}
+              />
+            </div>
           </div>
         )}
 
